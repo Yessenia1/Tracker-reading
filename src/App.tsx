@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Plus, 
-  Search, 
-  BookMarked, 
-  Compass, 
-  Clock, 
+import {
+  Plus,
+  Search,
+  BookMarked,
+  Compass,
+  Clock,
   Filter,
   Sparkles,
   Download,
@@ -15,13 +15,18 @@ import {
   Database
 } from 'lucide-react';
 import type { Item, ReadingStatus, ReadingType } from './types';
-import { 
-  fetchItems, 
-  persistItems, 
-  fetchCategories, 
-  persistCategories, 
-  fetchTypes, 
-  persistTypes 
+import {
+  fetchItems,
+  persistItems,
+  fetchCategories,
+  persistCategories,
+  fetchTypes,
+  persistTypes,
+  saveItemToSupabase,
+  deleteItemFromSupabase,
+  saveTypeToSupabase,
+  deleteTypeFromSupabase,
+  saveCategoryToSupabase
 } from './storage';
 import { isSupabaseConfigured } from './supabaseClient';
 import { ItemCard } from './ItemCard';
@@ -76,12 +81,14 @@ export function App() {
   }, []);
 
   // CRUD Items
-  const handleSaveItem = (itemData: Partial<Item>) => {
+  const handleSaveItem = async (itemData: Partial<Item>) => {
+    let targetItem: Item;
     let updated: Item[];
     if (editingItem) {
-      updated = items.map((it) => (it.id === editingItem.id ? { ...it, ...itemData } as Item : it));
+      targetItem = { ...editingItem, ...itemData } as Item;
+      updated = items.map((it) => (it.id === editingItem.id ? targetItem : it));
     } else {
-      const newItem: Item = {
+      targetItem = {
         id: Date.now().toString(),
         title: itemData.title || '',
         typeSlug: itemData.typeSlug || readingTypes[0]?.slug || 'manhwa',
@@ -97,22 +104,32 @@ export function App() {
         notes: itemData.notes,
         updatedAt: new Date().toISOString(),
       };
-      updated = [newItem, ...items];
+      updated = [targetItem, ...items];
     }
     setItems(updated);
     persistItems(updated);
     setEditingItem(null);
+
+    // Guardar en Supabase si está conectado
+    const res = await saveItemToSupabase(targetItem);
+    if (res && res.id && !editingItem) {
+      const synced = updated.map((it) => it.id === targetItem.id ? { ...it, id: res.id } : it);
+      setItems(synced);
+      persistItems(synced);
+    }
   };
 
-  const handleDeleteItem = (id: string) => {
+  const handleDeleteItem = async (id: string) => {
     if (window.confirm('¿Seguro que deseas eliminar este elemento?')) {
       const updated = items.filter((it) => it.id !== id);
       setItems(updated);
       persistItems(updated);
+      await deleteItemFromSupabase(id);
     }
   };
 
-  const handleUpdateProgress = (id: string, delta: number) => {
+  const handleUpdateProgress = async (id: string, delta: number) => {
+    let modified: Item | null = null;
     const updated = items.map((it) => {
       if (it.id !== id) return it;
       const typeObj = readingTypes.find((t) => t.slug === it.typeSlug);
@@ -120,18 +137,22 @@ export function App() {
 
       if (isPage) {
         const next = Math.max(0, (it.currentPage || 0) + delta);
-        return { ...it, currentPage: next, updatedAt: new Date().toISOString() };
+        modified = { ...it, currentPage: next, updatedAt: new Date().toISOString() };
       } else {
         const next = Math.max(0, (it.currentChapter || 0) + delta);
-        return { ...it, currentChapter: next, updatedAt: new Date().toISOString() };
+        modified = { ...it, currentChapter: next, updatedAt: new Date().toISOString() };
       }
+      return modified;
     });
     setItems(updated);
     persistItems(updated);
+    if (modified) {
+      await saveItemToSupabase(modified);
+    }
   };
 
   // CRUD Types
-  const handleAddType = (newType: Omit<ReadingType, 'id'>) => {
+  const handleAddType = async (newType: Omit<ReadingType, 'id'>) => {
     const created: ReadingType = {
       ...newType,
       id: Date.now().toString(),
@@ -139,23 +160,26 @@ export function App() {
     const updated = [...readingTypes, created];
     setReadingTypes(updated);
     persistTypes(updated);
+    await saveTypeToSupabase(newType);
   };
 
-  const handleDeleteType = (slug: string) => {
+  const handleDeleteType = async (slug: string) => {
     if (window.confirm(`¿Eliminar el tipo "${slug}"?`)) {
       const updated = readingTypes.filter((t) => t.slug !== slug);
       setReadingTypes(updated);
       persistTypes(updated);
       if (selectedType === slug) setSelectedType('all');
+      await deleteTypeFromSupabase(slug);
     }
   };
 
   // Categories
-  const handleAddCategory = (newCat: string) => {
+  const handleAddCategory = async (newCat: string) => {
     if (!categories.includes(newCat)) {
       const updated = [...categories, newCat];
       setCategories(updated);
       persistCategories(updated);
+      await saveCategoryToSupabase(newCat);
     }
   };
 
@@ -349,11 +373,10 @@ export function App() {
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => setSelectedType('all')}
-              className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
-                selectedType === 'all'
+              className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${selectedType === 'all'
                   ? 'bg-slate-800 dark:bg-indigo-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
+                }`}
             >
               Todos
             </button>
@@ -361,11 +384,10 @@ export function App() {
               <button
                 key={t.slug}
                 onClick={() => setSelectedType(t.slug)}
-                className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition-all ${
-                  selectedType === t.slug
+                className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition-all ${selectedType === t.slug
                     ? 'bg-slate-800 dark:bg-indigo-600 text-white shadow-xs'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
+                  }`}
               >
                 <span>{t.icon}</span>
                 <span>{t.label}</span>
@@ -386,11 +408,10 @@ export function App() {
                 <button
                   key={st.id}
                   onClick={() => setSelectedStatus(st.id as any)}
-                  className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition ${
-                    selectedStatus === st.id
+                  className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition ${selectedStatus === st.id
                       ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs'
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                  }`}
+                    }`}
                 >
                   {st.label}
                 </button>
