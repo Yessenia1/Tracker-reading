@@ -1,5 +1,6 @@
-import { Plus, Minus, Trash2, Edit3, BookOpen, Layers } from 'lucide-react';
+import { Plus, Minus, Trash2, Edit3, BookOpen, Layers, Star } from 'lucide-react';
 import type { Item, ReadingStatus, ReadingType } from './types';
+import { TypeIcon } from './IconHelper';
 
 interface CardProps {
   item: Item;
@@ -51,8 +52,8 @@ export const ItemCard: React.FC<CardProps> = ({
 
           {/* Type Badge & Status Pill */}
           <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5">
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-800 dark:text-slate-200 shadow-xs uppercase tracking-wider flex items-center gap-1">
-              <span>{readingType?.icon || '📖'}</span>
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-800 dark:text-slate-200 shadow-xs uppercase tracking-wider flex items-center gap-1.5">
+              <TypeIcon iconName={readingType?.icon} size={13} className="text-indigo-600 dark:text-indigo-400" />
               <span>{readingType?.label || item.typeSlug}</span>
             </span>
             <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold shadow-xs ${currentStatus.bg} ${currentStatus.color} ${currentStatus.darkBg} ${currentStatus.darkColor}`}>
@@ -86,8 +87,8 @@ export const ItemCard: React.FC<CardProps> = ({
               {item.title}
             </h3>
             {item.rating ? (
-              <span className="text-amber-500 font-bold text-xs flex items-center shrink-0">
-                ★ {item.rating}
+              <span className="text-amber-500 font-bold text-xs flex items-center gap-1 shrink-0">
+                <Star size={13} className="fill-amber-400 text-amber-400" /> {item.rating}
               </span>
             ) : null}
           </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Trash2, Tag, BookOpen, Layers } from 'lucide-react';
 import type { ReadingType, ProgressTrackingType } from './types';
+import { ICON_OPTIONS, TypeIcon } from './IconHelper';
 
 interface TypesModalProps {
   isOpen: boolean;
@@ -20,10 +21,8 @@ export const TypesModal: React.FC<TypesModalProps> = ({
   if (!isOpen) return null;
 
   const [label, setLabel] = useState('');
-  const [icon, setIcon] = useState('✨');
+  const [selectedIconName, setSelectedIconName] = useState('Sparkles');
   const [progressType, setProgressType] = useState<ProgressTrackingType>('chapter');
-
-  const commonIcons = ['✨', '📖', '📚', '🦸', '📜', '🎨', '📝', '🎬', '🎧'];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +38,7 @@ export const TypesModal: React.FC<TypesModalProps> = ({
     onAddType({
       slug,
       label: cleanLabel,
-      icon,
+      icon: selectedIconName,
       progressType,
     });
 
@@ -80,7 +79,9 @@ export const TypesModal: React.FC<TypesModalProps> = ({
                 className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">{t.icon}</span>
+                  <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <TypeIcon iconName={t.icon} size={16} />
+                  </div>
                   <div>
                     <span className="text-sm font-bold text-slate-800 dark:text-slate-200 block leading-tight">
                       {t.label}
@@ -122,22 +123,27 @@ export const TypesModal: React.FC<TypesModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Emoji / Ícono</label>
-            <div className="flex flex-wrap gap-1.5">
-              {commonIcons.map((ic) => (
-                <button
-                  key={ic}
-                  type="button"
-                  onClick={() => setIcon(ic)}
-                  className={`w-9 h-9 rounded-2xl text-base flex items-center justify-center transition ${
-                    icon === ic
-                      ? 'bg-indigo-600 text-white shadow-xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {ic}
-                </button>
-              ))}
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Ícono</label>
+            <div className="grid grid-cols-5 gap-1.5">
+              {ICON_OPTIONS.map((opt) => {
+                const IconComp = opt.component;
+                const isSelected = selectedIconName === opt.name;
+                return (
+                  <button
+                    key={opt.name}
+                    type="button"
+                    onClick={() => setSelectedIconName(opt.name)}
+                    title={opt.label}
+                    className={`h-9 rounded-2xl flex items-center justify-center transition ${
+                      isSelected
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <IconComp size={16} />
+                  </button>
+                );
+              })}
             </div>
           </div>
 

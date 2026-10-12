@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Sparkles, BookOpen, Layers, Search, Loader2, Image as ImageIcon, Check } from 'lucide-react';
+import { X, Plus, Sparkles, BookOpen, Layers, Search, Loader2, Image as ImageIcon, Check, Star } from 'lucide-react';
 import type { Item, ReadingStatus, ReadingType } from './types';
 import { searchCoverOnline, type CoverSearchResult } from './coverSearch';
 
@@ -195,7 +195,7 @@ export const ItemModal: React.FC<ModalProps> = ({
               >
                 {availableTypes.map((t) => (
                   <option key={t.slug} value={t.slug}>
-                    {t.icon} {t.label}
+                    {t.label}
                   </option>
                 ))}
               </select>
@@ -210,10 +210,10 @@ export const ItemModal: React.FC<ModalProps> = ({
                 onChange={(e) => setStatus(e.target.value as ReadingStatus)}
                 className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-indigo-400 focus:outline-none transition text-slate-800 dark:text-slate-100 text-sm font-medium cursor-pointer"
               >
-                <option value="reading">🟢 Leyendo</option>
-                <option value="plan_to_read">⏳ Por leer</option>
-                <option value="completed">✅ Completado</option>
-                <option value="on_hold">⏸️ En pausa</option>
+                <option value="reading">Leyendo</option>
+                <option value="plan_to_read">Por leer</option>
+                <option value="completed">Completado</option>
+                <option value="on_hold">En pausa</option>
               </select>
             </div>
           </div>
@@ -427,7 +427,7 @@ export const ItemModal: React.FC<ModalProps> = ({
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
-                  ★
+                  <Star size={16} className={(rating || 0) >= star ? 'fill-white text-white' : 'text-slate-400'} />
                 </button>
               ))}
             </div>

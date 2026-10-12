@@ -6,11 +6,11 @@ const CATEGORIES_KEY = 'bibliotrack_categories_data_v2';
 const TYPES_KEY = 'bibliotrack_reading_types_v2';
 
 export const INITIAL_TYPES: ReadingType[] = [
-  { id: '1', slug: 'manhwa', label: 'Manhwa', icon: '✨', progressType: 'chapter' },
-  { id: '2', slug: 'manga', label: 'Manga', icon: '📖', progressType: 'chapter' },
-  { id: '3', slug: 'libro', label: 'Libro', icon: '📚', progressType: 'page' },
-  { id: '4', slug: 'comic', label: 'Cómic', icon: '🦸', progressType: 'chapter' },
-  { id: '5', slug: 'novela', label: 'Novela Ligera', icon: '📜', progressType: 'page' },
+  { id: '1', slug: 'manhwa', label: 'Manhwa', icon: 'Sparkles', progressType: 'chapter' },
+  { id: '2', slug: 'manga', label: 'Manga', icon: 'BookOpen', progressType: 'chapter' },
+  { id: '3', slug: 'libro', label: 'Libro', icon: 'BookMarked', progressType: 'page' },
+  { id: '4', slug: 'comic', label: 'Cómic', icon: 'Zap', progressType: 'chapter' },
+  { id: '5', slug: 'novela', label: 'Novela Ligera', icon: 'Scroll', progressType: 'page' },
 ];
 
 export const INITIAL_CATEGORIES = [

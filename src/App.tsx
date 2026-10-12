@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Plus,
   Search,
@@ -32,6 +32,7 @@ import { isSupabaseConfigured } from './supabaseClient';
 import { ItemCard } from './ItemCard';
 import { ItemModal } from './ItemModal';
 import { TypesModal } from './TypesModal';
+import { TypeIcon } from './IconHelper';
 
 export function App() {
   const [items, setItems] = useState<Item[]>([]);
@@ -374,8 +375,8 @@ export function App() {
             <button
               onClick={() => setSelectedType('all')}
               className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${selectedType === 'all'
-                  ? 'bg-slate-800 dark:bg-indigo-600 text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-slate-800 dark:bg-indigo-600 text-white shadow-xs'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
             >
               Todos
@@ -384,12 +385,12 @@ export function App() {
               <button
                 key={t.slug}
                 onClick={() => setSelectedType(t.slug)}
-                className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition-all ${selectedType === t.slug
-                    ? 'bg-slate-800 dark:bg-indigo-600 text-white shadow-xs'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all ${selectedType === t.slug
+                  ? 'bg-slate-800 dark:bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
               >
-                <span>{t.icon}</span>
+                <TypeIcon iconName={t.icon} size={14} />
                 <span>{t.label}</span>
               </button>
             ))}
@@ -409,8 +410,8 @@ export function App() {
                   key={st.id}
                   onClick={() => setSelectedStatus(st.id as any)}
                   className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition ${selectedStatus === st.id
-                      ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                     }`}
                 >
                   {st.label}
